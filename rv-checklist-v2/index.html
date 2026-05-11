@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RV Checklist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pine: #1a2e1a;
+      --forest: #2d4a2d;
+      --moss: #4a6741;
+      --sage: #7a9e6f;
+      --straw: #e8d5a3;
+      --sand: #f5ead0;
+      --rust: #c4622d;
+      --bark: #3d2b1a;
+      --dusk: #6a8fa3;
+      --cream: #faf6ed;
+      --charcoal: #2a2a2a;
+    }
+
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--cream);
+      color: var(--pine);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .site-header {
+      background: var(--pine);
+      color: var(--straw);
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .header-icon { font-size: 2.5rem; }
+    .header-text h1 {
+      font-family: 'Teko', sans-serif;
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1;
+      color: var(--straw);
+    }
+    .header-text p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-top: 0.25rem;
+    }
+
+    /* TABS */
+    .tab-nav {
+      background: var(--forest);
+      display: flex;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 0.9rem 1.5rem;
+      font-family: 'Teko', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--sage);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: var(--straw); background: rgba(255,255,255,0.05); }
+    .tab-btn.active { color: var(--straw); border-bottom-color: #e8813a; background: rgba(232,129,58,0.1); }
+
+    /* MAIN */
+    .main { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+
+    .panel { display: none; animation: fadeIn 0.25s ease; }
+    .panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* CATEGORY HEADER */
+    .cat-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid var(--straw); }
+    .cat-badge { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 2px; }
+    .badge-green { background: var(--moss); color: var(--sand); }
+    .badge-rust  { background: var(--rust); color: var(--sand); }
+    .cat-title { font-family: 'Teko', sans-serif; font-size: 1.8rem; font-weight: 600; letter-spacing: 0.04em; }
+    .cat-sub { font-size: 0.82rem; color: var(--moss); font-style: italic; margin-top: 0.1rem; }
+
+    /* PROGRESS */
+    .progress-wrap { background: rgba(26,46,26,0.1); border-radius: 99px; height: 6px; margin: 1.25rem 0 0.5rem; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--moss), var(--sage)); transition: width 0.35s ease; }
+    .progress-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--moss); letter-spacing: 0.07em; margin-bottom: 1.25rem; }
+
+    /* ACTIONS */
+    .actions { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem; }
+    .btn-save {
+      font-family: 'Teko', sans-serif; font-size: 1.05rem; font-weight: 600;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 0.6rem 1.25rem; border: none; border-radius: 2px; cursor: pointer; transition: filter 0.2s;
+    }
+    .btn-save:hover { filter: brightness(1.12); }
+    .btn-save.green { background: var(--moss); color: var(--sand); }
+    .btn-save.rust  { background: var(--rust); color: var(--sand); }
+    .btn-reset {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.05em;
+      padding: 0.55rem 0.9rem; border: 1px solid rgba(26,46,26,0.25); border-radius: 2px;
+      background: transparent; color: var(--charcoal); cursor: pointer; transition: all 0.2s;
+    }
+    .btn-reset:hover { border-color: var(--rust); color: var(--rust); }
+    .done-badge {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.07em;
+      padding: 0.35rem 0.7rem; background: rgba(74,103,65,0.12); color: var(--moss);
+      border: 1px solid rgba(74,103,65,0.2); border-radius: 2px;
+    }
+
+    /* CHECKLIST GRID */
+    .checklist-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+
+    .cl-section { background: white; border: 1px solid rgba(26,46,26,0.12); border-radius: 4px; overflow: hidden; box-shadow: 0 2px 6px rgba(26,46,26,0.08); }
+    .cl-section-head {
+      padding: 0.65rem 1rem;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--sand);
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .cl-section-head.green { background: var(--forest); }
+    .cl-section-head.moss  { background: var(--moss); }
+    .cl-section-head.dusk  { background: var(--dusk); }
+    .cl-section-head.rust  { background: var(--bark); }
+
+    /* CHECK ITEM */
+    .check-item {
+      display: flex; align-items: flex-start; gap: 0.7rem;
+      padding: 0.55rem 1rem; cursor: pointer;
+      border-bottom: 1px solid rgba(26,46,26,0.06);
+      transition: background 0.15s; user-select: none;
+    }
+    .check-item:last-child { border-bottom: none; }
+    .check-item:hover { background: var(--sand); }
+    .check-item.checked { background: rgba(74,103,65,0.06); }
+
+    .check-box {
+      width: 19px; height: 19px; min-width: 19px;
+      border: 2px solid var(--sage); border-radius: 2px;
+      background: white; display: flex; align-items: center; justify-content: center;
+      margin-top: 2px; transition: all 0.18s;
+    }
+    .check-item.checked .check-box { background: var(--moss); border-color: var(--moss); }
+    .check-mark { display: none; color: white; font-size: 12px; font-weight: bold; line-height: 1; }
+    .check-item.checked .check-mark { display: block; }
+
+    .check-label { font-size: 0.88rem; line-height: 1.4; color: var(--charcoal); transition: color 0.18s; }
+    .check-item.checked .check-label { color: var(--moss); text-decoration: line-through; text-decoration-color: var(--sage); }
+
+    /* TRIP LOG */
+    .trip-log { margin-top: 2rem; border-top: 2px solid var(--straw); padding-top: 1.25rem; }
+    .trip-log-title { font-family: 'Teko', sans-serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--pine); margin-bottom: 0.75rem; }
+    .trip-empty { font-size: 0.83rem; color: var(--moss); font-style: italic; padding: 1.25rem; text-align: center; background: rgba(26,46,26,0.04); border: 1px dashed rgba(26,46,26,0.15); border-radius: 4px; }
+    .trip-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .trip-card {
+      background: white; border: 1px solid rgba(26,46,26,0.12); border-radius: 4px;
+      padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;
+      box-shadow: 0 1px 4px rgba(26,46,26,0.07);
+    }
+    .trip-icon { font-size: 1.3rem; line-height: 1; margin-top: 2px; }
+    .trip-body { flex: 1; min-width: 0; }
+    .trip-date { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dusk); margin-bottom: 0.2rem; }
+    .trip-summary { font-size: 0.86rem; color: var(--charcoal); }
+    .trip-stats { font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem; color: var(--moss); margin-top: 0.2rem; }
+    .btn-del {
+      background: none; border: 1px solid rgba(196,98,45,0.3); color: var(--rust);
+      border-radius: 2px; cursor: pointer; padding: 0.28rem 0.5rem; font-size: 0.75rem;
+      transition: all 0.18s; white-space: nowrap; flex-shrink: 0;
+    }
+    .btn-del:hover { background: var(--rust); color: white; }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: var(--pine); color: var(--straw);
+      padding: 0.7rem 1.1rem; border-radius: 4px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; letter-spacing: 0.04em;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      z-index: 999;
+    }
+    #toast.show { opacity: 1; }
+
+    @media (max-width: 600px) {
+      .header-text h1 { font-size: 2rem; }
+      .main { padding: 1rem; }
+      .checklist-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-icon">🚐</div>
+    <div class="header-text">
+      <h1>RV Checklist</h1>
+      <p>Setup &amp; Closeup — Never Forget a Step</p>
+    </div>
+  </div>
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('setup')">🏕️ Setup &amp; Arrival</button>
+    <button class="tab-btn" onclick="switchTab('closeup')">🚗 Closeup &amp; Departure</button>
+  </nav>
+</header>
+
+<main class="main">
+  <!-- PANEL 1: Setup -->
+  <div id="panel-setup" class="panel active">
+    <div class="cat-header">
+      <span class="cat-badge badge-green">🏕️ Category 1</span>
+      <div>
+        <div class="cat-title">Setup &amp; Arrival</div>
+        <div class="cat-sub">From hooking up at home to fully settled at your campsite</div>
+      </div>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" id="prog-setup" style="width:0%"></div></div>
+    <div class="progress-label" id="prog-label-setup">0 of 35 items complete (0%)</div>
+    <div class="actions">
+      <button class="btn-save green" onclick="saveTrip('setup')">💾 Save &amp; Clear for Next Trip</button>
+      <button class="btn-reset" onclick="resetChecks('setup')">Reset Checklist</button>
+      <span class="done-badge" id="done-setup" style="display:none">🎉 All done!</span>
+    </div>
+    <div class="checklist-grid" id="grid-setup"></div>
+    <div class="trip-log" id="log-setup"></div>
+  </div>
+
+  <!-- PANEL 2: Closeup -->
+  <div id="panel-closeup" class="panel">
+    <div class="cat-header">
+      <span class="cat-badge badge-rust">🚗 Category 2</span>
+      <div>
+        <div class="cat-title">Closeup &amp; Departure</div>
+        <div class="cat-sub">Everything to do before towing off your campsite safely</div>
+      </div>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" id="prog-closeup" style="width:0%"></div></div>
+    <div class="progress-label" id="prog-label-closeup">0 of 35 items complete (0%)</div>
+    <div class="actions">
+      <button class="btn-save rust" onclick="saveTrip('closeup')">💾 Save &amp; Clear for Next Trip</button>
+      <button class="btn-reset" onclick="resetChecks('closeup')">Reset Checklist</button>
+      <span class="done-badge" id="done-closeup" style="display:none">🎉 All done!</span>
+    </div>
+    <div class="checklist-grid" id="grid-closeup"></div>
+    <div class="trip-log" id="log-closeup"></div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+
+const CHECKLISTS = {
+  setup: [
+    {
+      id: 'hitch', color: 'green', icon: '🔗', title: 'Hitching & Towing',
+      items: [
+        'Inspect trailer hitch ball and coupler for wear',
+        'Connect coupler to hitch ball and lock latch',
+        'Insert hitch pin and secure with clip/lock',
+        'Attach safety chains (crossed under tongue)',
+        'Connect trailer wiring harness / 7-pin connector',
+        'Test all trailer lights (brake, turn, running)',
+        'Attach breakaway cable to tow vehicle',
+        'Check trailer brake controller settings',
+      ]
+    },
+    {
+      id: 'predep', color: 'moss', icon: '✅', title: 'Pre-Departure Checks',
+      items: [
+        'Check RV tire pressure (all tires including spare)',
+        'Confirm wheel lug nuts are torqued',
+        'Retract all slide-outs fully',
+        'Retract all awnings and secure',
+        'Close and latch all exterior compartment doors',
+        'Secure all interior cabinets and latches',
+        'Stow and secure all loose items inside',
+        'Close all roof vents and windows',
+        'Disconnect and stow shore power / water hoses',
+        'Retract stabilizer jacks fully',
+        'Verify antenna is down',
+      ]
+    },
+    {
+      id: 'arrive', color: 'dusk', icon: '🏕️', title: 'Arriving at Campsite',
+      items: [
+        'Level the RV side-to-side with leveling blocks / auto-level',
+        'Level the RV front-to-back',
+        'Deploy stabilizer jacks (do not use for leveling)',
+        'Chock all wheels',
+        'Disconnect tow vehicle from RV',
+      ]
+    },
+    {
+      id: 'utilities', color: 'rust', icon: '⚡', title: 'Utilities & Setup',
+      items: [
+        'Connect shore power cable (check amp rating: 30A or 50A)',
+        'Test GFCI outlets and breakers',
+        'Connect freshwater hose (use drinking-safe hose)',
+        'Attach water pressure regulator before connecting',
+        'Connect sewer hose and secure to dump station',
+        'Open gray tank valve (keep black closed during stay)',
+        'Check propane tanks — turn on main valve',
+        'Test CO/propane detector and smoke alarm',
+        'Extend slide-outs as desired',
+        'Extend awning(s)',
+        'Set up outdoor furniture / gear',
+        'Confirm water heater on (electric or propane)',
+        'Verify refrigerator running on correct power source',
+      ]
+    },
+  ],
+  closeup: [
+    {
+      id: 'interior', color: 'rust', icon: '🏠', title: 'Interior Prep',
+      items: [
+        'Retract all slide-outs',
+        'Secure all cabinet doors and latches',
+        'Stow all loose items — nothing can slide or fall',
+        'Empty and clean refrigerator if not running on travel mode',
+        'Secure refrigerator door latches',
+        'Close and lock all interior windows',
+        'Close all roof vents',
+        'Turn off all interior lights',
+        'Turn off water heater',
+        'Turn off air conditioner / furnace',
+      ]
+    },
+    {
+      id: 'util-close', color: 'moss', icon: '🔌', title: 'Utilities Disconnect',
+      items: [
+        'Dump black tank — rinse with flush wand',
+        'Dump gray tank (flushes sewer hose)',
+        'Close gray and black tank valves',
+        'Disconnect, rinse, and stow sewer hose',
+        'Disconnect freshwater hose and drain',
+        'Turn off water pump',
+        'Disconnect shore power — coil and stow cable',
+        'Close propane main valve',
+        'Close all exterior compartments and lock',
+      ]
+    },
+    {
+      id: 'ext-close', color: 'dusk', icon: '🚐', title: 'Exterior Prep',
+      items: [
+        'Retract all awnings and secure latches',
+        'Remove wheel chocks',
+        'Retract all stabilizer jacks fully',
+        'Lower and stow TV antenna',
+        'Remove all outdoor furniture / gear and stow',
+        'Walk full perimeter — check nothing left behind',
+        'Check tire pressure before departing',
+      ]
+    },
+    {
+      id: 'hitch-close', color: 'green', icon: '🔗', title: 'Hitching for Departure',
+      items: [
+        'Pull tow vehicle into position',
+        'Connect coupler to hitch ball and lock latch',
+        'Insert hitch pin and secure with clip/lock',
+        'Attach safety chains (crossed)',
+        'Connect 7-pin wiring harness',
+        'Attach breakaway cable',
+        'Test all trailer lights',
+        'Verify brake controller active',
+        'Do final walk-around — nothing left at site',
+      ]
+    },
+  ]
+};
+
+// Build flat item id list for each category
+const ALL_IDS = {};
+CHECKLISTS.setup.forEach(s => s.items.forEach((_, i) => {
+  if (!ALL_IDS.setup) ALL_IDS.setup = [];
+  ALL_IDS.setup.push(`${s.id}-${i}`);
+}));
+CHECKLISTS.closeup.forEach(s => s.items.forEach((_, i) => {
+  if (!ALL_IDS.closeup) ALL_IDS.closeup = [];
+  ALL_IDS.closeup.push(`${s.id}-${i}`);
+}));
+
+// ── STORAGE ───────────────────────────────────────────────────────────────────
+
+function load(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }
+  catch { return def; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+
+const state = {
+  setup:   { checked: new Set(load('rv2_setup_checked', [])),   log: load('rv2_setup_log', []) },
+  closeup: { checked: new Set(load('rv2_closeup_checked', [])), log: load('rv2_closeup_log', []) },
+};
+
+function persistChecked(cat) {
+  save(`rv2_${cat}_checked`, [...state[cat].checked]);
+}
+function persistLog(cat) {
+  save(`rv2_${cat}_log`, state[cat].log);
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+
+function renderGrid(cat) {
+  const grid = document.getElementById(`grid-${cat}`);
+  grid.innerHTML = '';
+  CHECKLISTS[cat].forEach(section => {
+    const card = document.createElement('div');
+    card.className = 'cl-section';
+    const head = document.createElement('div');
+    head.className = `cl-section-head ${section.color}`;
+    head.innerHTML = `<span>${section.icon}</span>${section.title}`;
+    card.appendChild(head);
+    section.items.forEach((label, i) => {
+      const id = `${section.id}-${i}`;
+      const item = document.createElement('div');
+      item.className = 'check-item' + (state[cat].checked.has(id) ? ' checked' : '');
+      item.setAttribute('role', 'checkbox');
+      item.setAttribute('aria-checked', state[cat].checked.has(id));
+      item.setAttribute('tabindex', '0');
+      item.innerHTML = `<div class="check-box"><span class="check-mark">✓</span></div><span class="check-label">${label}</span>`;
+      item.addEventListener('click', () => toggle(cat, id, item));
+      item.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(cat, id, item); } });
+      card.appendChild(item);
+    });
+    grid.appendChild(card);
+  });
+  updateProgress(cat);
+}
+
+function toggle(cat, id, el) {
+  if (state[cat].checked.has(id)) {
+    state[cat].checked.delete(id);
+    el.classList.remove('checked');
+    el.setAttribute('aria-checked', 'false');
+  } else {
+    state[cat].checked.add(id);
+    el.classList.add('checked');
+    el.setAttribute('aria-checked', 'true');
+  }
+  persistChecked(cat);
+  updateProgress(cat);
+}
+
+function updateProgress(cat) {
+  const total = ALL_IDS[cat].length;
+  const done  = ALL_IDS[cat].filter(id => state[cat].checked.has(id)).length;
+  const pct   = total ? Math.round(done / total * 100) : 0;
+  document.getElementById(`prog-${cat}`).style.width = pct + '%';
+  document.getElementById(`prog-label-${cat}`).textContent = `${done} of ${total} items complete (${pct}%)`;
+  document.getElementById(`done-${cat}`).style.display = (done === total && total > 0) ? '' : 'none';
+}
+
+function renderLog(cat) {
+  const wrap = document.getElementById(`log-${cat}`);
+  const log  = state[cat].log;
+  const icon = cat === 'setup' ? '🏕️' : '🚗';
+  wrap.innerHTML = `<div class="trip-log-title">📋 Trip History</div>`;
+  if (log.length === 0) {
+    wrap.innerHTML += `<div class="trip-empty">No saved trips yet — complete a checklist and save it to keep a record.</div>`;
+    return;
+  }
+  const list = document.createElement('div');
+  list.className = 'trip-list';
+  [...log].reverse().forEach(entry => {
+    const card = document.createElement('div');
+    card.className = 'trip-card';
+    card.innerHTML = `
+      <div class="trip-icon">${icon}</div>
+      <div class="trip-body">
+        <div class="trip-date">${entry.date}</div>
+        <div class="trip-summary">${entry.summary}</div>
+        <div class="trip-stats">${entry.completed}/${entry.total} items completed</div>
+      </div>
+      <button class="btn-del" aria-label="Delete trip">🗑 Delete</button>
+    `;
+    card.querySelector('.btn-del').addEventListener('click', () => deleteTrip(cat, entry.id));
+    list.appendChild(card);
+  });
+  wrap.appendChild(list);
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────────────────────
+
+function saveTrip(cat) {
+  const total = ALL_IDS[cat].length;
+  const done  = ALL_IDS[cat].filter(id => state[cat].checked.has(id)).length;
+  if (done === 0) { showToast('⚠️ Nothing checked yet!'); return; }
+  const now = new Date();
+  const entry = {
+    id: String(Date.now()),
+    date: now.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    summary: done === total ? `All ${total} items completed ✓` : `${done} of ${total} items completed`,
+    completed: done,
+    total,
+  };
+  state[cat].log.push(entry);
+  state[cat].checked.clear();
+  persistLog(cat);
+  persistChecked(cat);
+  renderGrid(cat);
+  renderLog(cat);
+  showToast('✅ Trip saved! Checklist cleared.');
+}
+
+function resetChecks(cat) {
+  if (!confirm('Clear all checked items? Saved trips will not be deleted.')) return;
+  state[cat].checked.clear();
+  persistChecked(cat);
+  renderGrid(cat);
+  showToast('🔄 Checklist cleared.');
+}
+
+function deleteTrip(cat, id) {
+  if (!confirm('Delete this trip record?')) return;
+  state[cat].log = state[cat].log.filter(e => e.id !== id);
+  persistLog(cat);
+  renderLog(cat);
+  showToast('🗑 Trip deleted.');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+
+function switchTab(cat) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`panel-${cat}`).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.textContent.toLowerCase().includes(cat === 'setup' ? 'setup' : 'closeup')) b.classList.add('active');
+  });
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+
+renderGrid('setup');
+renderGrid('closeup');
+renderLog('setup');
+renderLog('closeup');
+</script>
+</body>
+</html>
